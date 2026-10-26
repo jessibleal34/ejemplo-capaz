@@ -8,13 +8,14 @@ import com.tareas.persistence.repository.RepositorioTareasMemoria;
 import com.tareas.persistence.repository.RepositorioTareasMySQL;
 import com.tareas.negocio.service.ServicioTareas;
 import com.tareas.presentacion.vista.VistaConsola;
+import com.tareas.persistence.repository.RepositorioTareasLog;
 
 /**
  * Paso 4 — El ÚNICO lugar que sabe qué implementación se usa (la inyección).
  *
- * Uso: java com.tareas.Principal [archivo | memoria | mysql]      (por defecto: archivo)
- * Para mysql: variables de entorno TAREAS_DB_URL, TAREAS_DB_USER, TAREAS_DB_PASS
- * y el conector de MySQL en el classpath.
+ * Uso: java com.tareas.Principal [archivo | memoria | mysql] (por defecto:
+ * archivo) Para mysql: variables de entorno TAREAS_DB_URL, TAREAS_DB_USER,
+ * TAREAS_DB_PASS y el conector de MySQL en el classpath.
  */
 public class Principal {
 
@@ -23,12 +24,19 @@ public class Principal {
 
         // 1) Se elige y se CREA la implementación (lo más profundo, primero)
         RepositorioTareas repositorio = switch (modo) {
-            case "memoria" -> new RepositorioTareasMemoria();
-            case "mysql" -> new RepositorioTareasMySQL(new TareaDAO(
-                    System.getenv().getOrDefault("TAREAS_DB_URL", "jdbc:mysql://localhost:3306/tareas"),
-                    System.getenv().getOrDefault("TAREAS_DB_USER", "root"),
-                    System.getenv().getOrDefault("TAREAS_DB_PASS", "")));
-            default -> new RepositorioTareasArchivo("tareas.txt");
+            case "memoria" ->
+                new RepositorioTareasMemoria();
+
+            case "log" ->
+                new RepositorioTareasLog();
+
+            case "mysql" ->
+                new RepositorioTareasMySQL(new TareaDAO(
+                System.getenv().getOrDefault("TAREAS_DB_URL", "jdbc:mysql://localhost:3306/tareas"),
+                System.getenv().getOrDefault("TAREAS_DB_USER", "root"),
+                System.getenv().getOrDefault("TAREAS_DB_PASS", "")));
+            default ->
+                new RepositorioTareasArchivo("tareas.txt");
         };
         System.out.println("Guardando con: " + repositorio.getClass().getSimpleName());
 
